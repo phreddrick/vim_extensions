@@ -1,0 +1,124 @@
+---
+# tasks file for vim_extensions
+- name: make sure git is installed(apt)
+  apt: name=git state=latest update_cache=yes
+  when: ansible_os_family == "Debian"
+
+- name: make sure git is installed(yum)
+  yum: name=git state=latest
+  when: ansible_os_family == "RedHat"
+
+- name: "Install gvim(apt)"
+  apt: name=vim-gtk state=latest update_cache=yes
+  when: ansible_os_family == "Debian"
+
+- name: "Install gvim(yum)"
+  yum: name={{ item }} state=latest update_cache=yes
+  with_items:
+    - ncurses-devel
+    - ruby-devel
+    - python-devel
+    - vim-X11
+  when: ansible_os_family == "RedHat"
+
+- name: "Make vim dirs"
+  become_user: "{{ username }}"
+  become: true
+  file: path=/home/{{ username }}/.vim/{{ item }} state=directory owner={{ username }} group={{ groupname }} mode=0755
+  with_items: 
+    - bundle
+    - autoload
+
+- name: "Install pathogen vim plugin manager"
+  get_url:
+    url: https://tpo.pe/pathogen.vim
+    dest: /home/{{ username }}/.vim/autoload/pathogen.vim
+    owner: "{{ username }}"
+    group: "{{ groupname }}"
+    mode: 0644
+    validate_certs: no
+
+- name: Clone vim plugins
+  become_user: "{{ username }}"
+  become: true
+  git: repo={{ item.value }} accept_hostkey=yes umask="0022" dest=/home/{{ username }}/.vim/bundle/{{ item.key }} ssh_opts="-i /home/{{ username }}/.ssh/id_rsa.initial -c http.sslVerify=false"
+  with_dict: "{{ repos }}"
+
+- name: "Check to see if we built vim already"
+  stat: path=/root/.vim_built
+  register: vim_built
+
+- name: Clone vim repo
+  git:
+    umask: "0077"
+    repo: "https://github.com/vim/vim.git"
+    dest: "/root/vim"
+  when: (ansible_os_family == "RedHat") and
+        (vim_built.stat.exists == False)
+
+- name: Enable python in vim build
+  lineinfile:
+    path: /root/vim/src/Makefile
+    regexp: '^#CONF_OPT_PYTHON = --enable-pythoninterp$'
+    line: 'CONF_OPT_PYTHON = --enable-pythoninterp'
+  when: (ansible_os_family == "RedHat") and
+        (vim_built.stat.exists == False)
+
+- name: Enable ruby in vim build
+  lineinfile:
+    path: /root/vim/src/Makefile
+    regexp: '^#CONF_OPT_RUBY = --enable-rubyinterp=dynamic$'
+    line: 'CONF_OPT_RUBY = --enable-rubyinterp=dynamic'
+  when: (ansible_os_family == "RedHat") and
+        (vim_built.stat.exists == False)
+
+- name: "Build vim"
+  make:
+    chdir: "/root/vim/src"
+  when: (ansible_os_family == "RedHat") and
+        (vim_built.stat.exists == False)
+
+- name: "Install vim"
+  make:
+    chdir: "/root/vim/src"
+    target: "install"
+  when: (ansible_os_family == "RedHat") and
+        (vim_built.stat.exists == False)
+
+- name: "Cleanup vim build"
+  file:
+    path: "/root/vim"
+    state: absent
+  when: (ansible_os_family == "RedHat") and
+        (vim_built.stat.exists == False)
+
+- name: "Mark vim as built"
+  file:
+    path: "/root/.vim_built"
+    state: touch
+  when: (ansible_os_family == "RedHat") and
+        (vim_built.stat.exists == False)
+
+- name: "Check to see if we built YouCompleteMe already"
+  become_user: "{{ username }}"
+  become: true
+  stat: path="/home/{{ username }}/.vim/.YouCompleteMe_built"
+  register: ycm_built
+
+- name: "Compile YouCompleteMe"
+  become_user: "{{ username }}"
+  become: true
+  shell: |
+    git submodule update --init --recursive
+    ./install.py --clang-completer
+  args:
+    chdir: /home/{{ username }}/.vim/bundle/YouCompleteMe
+  when: ycm_built.stat.exists == False
+
+- name: "Mark YouCompleteMe as built"
+  become_user: "{{ username }}"
+  become: true
+  file:
+    path: "/home/{{ username }}/.vim/.YouCompleteMe_built"
+    state: touch
+  when: ycm_built.stat.exists == False
