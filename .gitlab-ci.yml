@@ -1,0 +1,17 @@
+---
+image: retr0h/molecule:latest
+
+test:
+  stage: test
+  script:
+    - sudo molecule test
+  tags:
+    - docker
+
+test_debug:
+  stage: test
+  script:
+    - sudo molecule --debug test
+  tags:
+    - docker
+  when: manual
