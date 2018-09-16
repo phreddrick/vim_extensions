@@ -1,4 +1,5 @@
 ---
 # defaults file for vim_extensions
+create_account: false
 username: steve
 groupname: users

@@ -1,2 +1,13 @@
 ---
 # vars file for vim_extensions
+repos:
+  Dockerfile: https://github.com/ekalinin/Dockerfile.vim.git
+  vim-better-comments: https://github.com/jbgutierrez/vim-better-comments.git
+  vim-go: https://github.com/fatih/vim-go.git
+  vim-json: https://github.com/elzr/vim-json.git
+  vim-markdown: https://github.com/plasticboy/vim-markdown.git
+  vim-markdown-preview: https://github.com/iamcco/markdown-preview.vim.git
+  vim-ps1: https://github.com/PProvost/vim-ps1.git
+  vim-puppet: https://github.com/rodjek/vim-puppet.git
+  vim-todo-lists: https://github.com/aserebryakov/vim-todo-lists.git
+  YouCompleteMe: https://github.com/Valloric/YouCompleteMe.git

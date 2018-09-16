@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: all
+  roles:
+    - role: vim_extensions
+      create_account: true
+      username: tester

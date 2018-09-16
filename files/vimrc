@@ -1,0 +1,24 @@
+" File              : /home/steve/.vimrc
+" Date              : 22.05.2018
+" Last Modified Date: 22.05.2018
+set nocp
+set expandtab
+set shiftwidth=2
+set softtabstop=2
+
+" contents of minimal .vimrc
+" uncomment the following 3 lines after running the curl line below
+" curl -LSso ~/.vim/autoload/pathogen.vim https://tpo.pe/pathogen.vim
+execute pathogen#infect()
+syntax on
+filetype plugin indent on
+
+set encoding=utf-8
+
+set nobackup          " do not keep a backup file, use versions instead
+set paste
+
+let g:vim_markdown_folding_disabled=1
+let g:header_field_author = 'Steven Jorgensen'
+let g:header_field_author_email = 'phreddrick@gmail.com'
+map <F4> :AddHeader<CR>
