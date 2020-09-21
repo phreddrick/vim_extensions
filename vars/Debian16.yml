@@ -1,0 +1,14 @@
+---
+vim_pkgs:
+  - curl
+  - git
+  - g++
+  - build-essential
+  - cmake
+  - python-dev
+  - perl
+  - ruby
+  - vim
+  - vim-gtk
+
+youcompletemeref: "124661f218e80b96c1f9f3d124e99f9a2fd2d83b"

@@ -1,0 +1,15 @@
+---
+vim_pkgs:
+  - curl
+  - git
+  - "@Development tools"
+  - cmake
+  - python3-devel
+  - ncurses-devel
+  - ruby-devel
+  - perl
+  - ruby
+  - vim-enhanced
+  - vim-X11
+
+youcompletemeref: "master"

@@ -19,7 +19,7 @@ def test_hosts_file(host):
     (".vim/filetype.vim"),
 ])
 def test_vim_files(host, name):
-    print "Checking '"+name+"'"
+    print("Checking '"+name+"'")
     f = host.file('/home/tester/'+name)
     assert f.is_file
     assert f.user == 'tester'

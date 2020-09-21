@@ -1,5 +1,5 @@
 ---
-image: retr0h/molecule:latest
+image: quay.io/ansible/molecule:latest
 
 test:
   stage: test

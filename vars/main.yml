@@ -10,4 +10,4 @@ repos:
   vim-ps1: https://github.com/PProvost/vim-ps1.git
   vim-puppet: https://github.com/rodjek/vim-puppet.git
   vim-todo-lists: https://github.com/aserebryakov/vim-todo-lists.git
-  YouCompleteMe: https://github.com/Valloric/YouCompleteMe.git
+  # YouCompleteMe: https://github.com/Valloric/YouCompleteMe.git

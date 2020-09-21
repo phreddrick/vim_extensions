@@ -1,0 +1,14 @@
+---
+vim_pkgs:
+  - curl
+  - git
+  - g++
+  - build-essential
+  - cmake
+  - python3-dev
+  - perl
+  - ruby
+  - vim
+  - vim-gtk
+
+youcompletemeref: "master"

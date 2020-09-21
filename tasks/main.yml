@@ -1,4 +1,11 @@
 ---
+- name: Include OS-dependent variables
+  include_vars:
+    file: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_os_family }}{{ ansible_distribution_major_version }}.yml"
+    - "{{ ansible_os_family }}.yml"
+
 - name: Make sure user {{ username }} exists
   user:
     name: "{{ username }}"
@@ -39,40 +46,16 @@
 
 - name: "Install required packages(apt)"
   apt:
-    name: "{{ item }}"
+    name: "{{ vim_pkgs }}"
     state: present
     update_cache: true
-  with_items:
-    - curl
-    - git
-    - g++
-    - build-essential
-    - cmake
-    - python-dev
-    - python3-dev
-    - perl
-    - ruby
-    - vim
-    - vim-gtk
   when: ansible_os_family == "Debian"
 
 - name: "Install required packages(yum)"
   yum:
-    name: "{{ item }}"
+    name: "{{ vim_pkgs }}"
     state: present
     update_cache: true
-  with_items:
-    - curl
-    - git
-    - "@Development tools"
-    - cmake
-    - python-devel
-    - ncurses-devel
-    - ruby-devel
-    - perl
-    - ruby
-    - vim-enhanced
-    - vim-X11
   when: ansible_os_family == "RedHat"
 
 - name: "Install pathogen vim plugin manager"
@@ -112,56 +95,41 @@
   register: vim_built
 
 - name: Clone vim repo
-  git:
-    umask: "0077"
-    repo: "https://github.com/vim/vim.git"
-    dest: "/root/vim"
-    version: "master"
+  block:
+    - name: clone git repository
+      git:
+        umask: "0077"
+        repo: "https://github.com/vim/vim.git"
+        dest: "/root/vim"
+        version: "master"
+    - name: Enable python in vim build
+      lineinfile:
+        path: /root/vim/src/Makefile
+        regexp: '^#CONF_OPT_PYTHON = --enable-pythoninterp$'
+        line: 'CONF_OPT_PYTHON = --enable-pythoninterp'
+    - name: Enable ruby in vim build
+      lineinfile:
+        path: /root/vim/src/Makefile
+        regexp: '^#CONF_OPT_RUBY = --enable-rubyinterp=dynamic$'
+        line: 'CONF_OPT_RUBY = --enable-rubyinterp=dynamic'
+    - name: "Build vim"
+      make:
+        chdir: "/root/vim/src"
+    - name: "Install vim"
+      make:
+        chdir: "/root/vim/src"
+        target: "install"
+    - name: "Cleanup vim build"
+      file:
+        path: "/root/vim"
+        state: absent
+    - name: "Mark vim as built"
+      file:
+        path: "/root/.vim_built"
+        state: touch
   when: ansible_os_family == "RedHat" and
-        vim_built.stat.exists == False
-
-- name: Enable python in vim build
-  lineinfile:
-    path: /root/vim/src/Makefile
-    regexp: '^#CONF_OPT_PYTHON = --enable-pythoninterp$'
-    line: 'CONF_OPT_PYTHON = --enable-pythoninterp'
-  when: ansible_os_family == "RedHat" and
-        vim_built.stat.exists == False
-
-- name: Enable ruby in vim build
-  lineinfile:
-    path: /root/vim/src/Makefile
-    regexp: '^#CONF_OPT_RUBY = --enable-rubyinterp=dynamic$'
-    line: 'CONF_OPT_RUBY = --enable-rubyinterp=dynamic'
-  when: ansible_os_family == "RedHat" and
-        vim_built.stat.exists == False
-
-- name: "Build vim"
-  make:
-    chdir: "/root/vim/src"
-  when: ansible_os_family == "RedHat" and
-        vim_built.stat.exists == False
-
-- name: "Install vim"
-  make:
-    chdir: "/root/vim/src"
-    target: "install"
-  when: (ansible_os_family == "RedHat") and
-        (vim_built.stat.exists == False)
-
-- name: "Cleanup vim build"
-  file:
-    path: "/root/vim"
-    state: absent
-  when: ansible_os_family == "RedHat" and
-        vim_built.stat.exists == False
-
-- name: "Mark vim as built"
-  file:
-    path: "/root/.vim_built"
-    state: touch
-  when: (ansible_os_family == "RedHat") and
-        (vim_built.stat.exists == False)
+        ansible_distribution_major_version|int < 8 and
+        not vim_built.stat.exists
 
 - name: "Check to see if we built YouCompleteMe already"
   become_user: "{{ user.name }}"
@@ -173,22 +141,23 @@
 - name: "Compile YouCompleteMe"
   become_user: "{{ user.name }}"
   become: true
-  command: |
-    ./install.py --clang-completer
-  args:
-    chdir: "{{ user.home }}/.vim/bundle/YouCompleteMe"
-  when: ycm_built.stat.exists == False and
-        ((ansible_os_family == "RedHat" and
-        ansible_distribution_major_version > '6') or
-        (ansible_os_family == "Debian" and
-        ansible_distribution_major_version > '14'))
-
-- name: "Mark YouCompleteMe as built"
-  become_user: "{{ user.name }}"
-  become: true
-  file:
-    path: "/home/{{ user.name }}/.vim/.YouCompleteMe_built"
-    state: touch
-  when: ycm_built.stat.exists == False and
-        (ansible_os_family != "RedHat" or
-        ansible_distribution_major_version > '6')
+  block:
+    - name: checkout YouCompleteMe
+      git:
+        umask: "0022"
+        repo: "https://github.com/Valloric/YouCompleteMe.git"
+        dest: "{{ user.home }}/.vim/bundle/YouCompleteMe"
+        recursive: true
+        accept_hostkey: true
+        ssh_opts: "-c http.sslVerify=false"
+        version: "{{ youcompletemeref }}"
+    - name: Run install.py
+      command: |
+        ./install.py --clang-completer
+      args:
+        chdir: "{{ user.home }}/.vim/bundle/YouCompleteMe"
+    - name: "Mark YouCompleteMe as built"
+      file:
+        path: "/home/{{ user.name }}/.vim/.YouCompleteMe_built"
+        state: touch
+  when: not ycm_built.stat.exists
