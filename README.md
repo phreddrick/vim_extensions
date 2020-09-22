@@ -1,6 +1,8 @@
 vim_extensions
 =========
 
+[![Build Status](https://travis-ci.org/phreddrick/vim_extensions.svg?branch=master)](https://travis-ci.org/phreddrick/vim_extensions)
+
 Install various vim extenstions, including YouCompleteMe
 
 Requirements
