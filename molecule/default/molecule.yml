@@ -3,11 +3,14 @@ dependency:
   name: galaxy
 driver:
   name: docker
-lint:
-  name: yamllint
 platforms:
   - name: vim_extensions_ubuntu2004
-    image: ubuntu:20.04
+    image: "geerlingguy/docker-ubuntu2004-ansible:latest"
+    command: ${MOLECULE_DOCKER_COMMAND:-""}
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
   - name: vim_extensions_ubuntu1804
     image: "geerlingguy/docker-ubuntu1804-ansible:latest"
     command: ${MOLECULE_DOCKER_COMMAND:-""}
@@ -36,14 +39,14 @@ platforms:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     privileged: true
     pre_build_image: true
-  - name: vim_extensions_debianstretch
+  - name: vim_extensions_debian9
     image: "geerlingguy/docker-debian9-ansible:latest"
     command: ${MOLECULE_DOCKER_COMMAND:-""}
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     privileged: true
     pre_build_image: true
-  - name: vim_extensions_debianbuster
+  - name: vim_extensions_debian10
     image: "geerlingguy/docker-debian10-ansible:latest"
     command: ${MOLECULE_DOCKER_COMMAND:-""}
     volumes:
@@ -52,19 +55,18 @@ platforms:
     pre_build_image: true
 provisioner:
   name: ansible
-  lint:
-    name: ansible-lint
+  playbooks:
+    converge: ../resources/playbooks/converge.yml
+    verify: ../resources/playbooks/verify.yml
   inventory:
     host_vars:
       vim_extensions_centos8:
         ansible_python_interpreter: /usr/bin/python3
       vim_extensions_ubuntu1804:
         ansible_python_interpreter: /usr/bin/python3
-      vim_extensions_debianbuster:
+      vim_extensions_debian9:
+        ansible_python_interpreter: /usr/bin/python
+      vim_extensions_debian10:
         ansible_python_interpreter: /usr/bin/python3
-scenario:
-  name: default
 verifier:
-  name: testinfra
-  lint:
-    name: flake8
+  name: ansible

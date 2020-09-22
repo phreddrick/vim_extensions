@@ -1,17 +1,53 @@
 ---
-image: quay.io/ansible/molecule:latest
+default:
+  image: quay.io/ansible/molecule:3.0.8
 
-test:
+.test:
   stage: test
   script:
     - sudo molecule test
   tags:
     - docker
 
-test_debug:
+.test_debug:
   stage: test
   script:
     - sudo molecule --debug test
   tags:
     - docker
   when: manual
+
+test_ubuntu2004:
+  extends: .test
+  variables:
+    MOLECULE_DISTRO: ubuntu2004
+
+test_ubuntu1804:
+  extends: .test
+  variables:
+    MOLECULE_DISTRO: ubuntu1804
+
+test_ubuntu1604:
+  extends: .test
+  variables:
+    MOLECULE_DISTRO: ubuntu1604
+
+test_centos8:
+  extends: .test
+  variables:
+    MOLECULE_DISTRO: centos8
+
+test_centos7:
+  extends: .test
+  variables:
+    MOLECULE_DISTRO: centos7
+
+test_debian10:
+  extends: .test
+  variables:
+    MOLECULE_DISTRO: debian10
+
+test_debian9:
+  extends: .test
+  variables:
+    MOLECULE_DISTRO: debian9

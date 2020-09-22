@@ -1,0 +1,30 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  - name: "vim_extensions_${MOLECULE_DISTRO:-centos7}"
+    image: "geerlingguy/docker-${MOLECULE_DISTRO:-centos7}-ansible:latest"
+    command: ${MOLECULE_DOCKER_COMMAND:-""}
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
+provisioner:
+  name: ansible
+  playbooks:
+    converge: ../resources/playbooks/converge.yml
+    verify: ../resources/playbooks/verify.yml
+  inventory:
+    host_vars:
+      vim_extensions_centos8:
+        ansible_python_interpreter: /usr/bin/python3
+      vim_extensions_ubuntu1804:
+        ansible_python_interpreter: /usr/bin/python3
+      vim_extensions_debian9:
+        ansible_python_interpreter: /usr/bin/python
+      vim_extensions_debian10:
+        ansible_python_interpreter: /usr/bin/python3
+verifier:
+  name: ansible

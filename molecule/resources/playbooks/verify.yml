@@ -1,0 +1,18 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Stat all vim files created
+      stat:
+        path: "/home/tester/.{{ item }}"
+      with_items:
+        - vimrc
+        - "vim/filetype.vim"
+      register: check_vimfile
+
+    - name: "explicitly fail if vim file doesn't exist"
+      fail:
+        msg: "{{ item.stat.path }} does not exist, but should"
+      with_items: "{{ check_vimfile.results }}"
+      when: not item.stat.exists or item.stat.pw_name != 'tester'
+
