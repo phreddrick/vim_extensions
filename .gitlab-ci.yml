@@ -5,14 +5,14 @@ default:
 .test:
   stage: test
   script:
-    - sudo molecule test
+    - molecule test
   tags:
     - docker
 
 .test_debug:
   stage: test
   script:
-    - sudo molecule --debug test
+    - molecule --debug test
   tags:
     - docker
   when: manual
