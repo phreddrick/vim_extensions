@@ -5,14 +5,14 @@ default:
 .test:
   stage: test
   script:
-    - molecule test
+    - molecule test -s jobs
   tags:
     - docker
 
 .test_debug:
   stage: test
   script:
-    - molecule --debug test
+    - molecule --debug test -s jobs
   tags:
     - docker
   when: manual
