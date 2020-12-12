@@ -12,4 +12,4 @@ vim_pkgs:
   - vim-enhanced
   - vim-X11
 
-youcompletemeref: "master"
+youcompletemeref: "d98f896ada495c3687007313374b2f945a2f2fb4"

@@ -2,14 +2,13 @@
 vim_pkgs:
   - curl
   - git
-  - "@Development tools"
+  - g++
+  - build-essential
   - cmake
-  - python3-devel
-  - ncurses-devel
-  - ruby-devel
+  - python3-dev
   - perl
   - ruby
-  - vim-enhanced
-  - vim-X11
+  - vim
+  - vim-gtk
 
 youcompletemeref: "d98f896ada495c3687007313374b2f945a2f2fb4"
